@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora Elton Fernandes — Reajuste ANS</title>
+<meta name="description" content="Calculadora comparativa de reajustes de planos de saúde individuais/familiares: valores cobrados pela operadora versus índices máximos autorizados pela ANS. Ferramenta educacional desenvolvida em homenagem ao Prof. Elton Fernandes.">
+<style>
+  :root {
+    --azul-escuro: #1F3864;
+    --azul-medio: #2E5090;
+    --azul-claro: #B8CCE4;
+    --azul-muito-claro: #DCE6F1;
+    --laranja-claro: #FCE4D6;
+    --verde-claro: #C6EFCE;
+    --verde-escuro: #375623;
+    --vermelho-escuro: #C00000;
+    --cinza-borda: #D0D0D0;
+    --cinza-texto: #555;
+    --fundo: #F5F6FA;
+    --branco: #FFFFFF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: var(--fundo);
+    color: #222;
+    line-height: 1.5;
+    padding: 20px;
+  }
+  .container { max-width: 1400px; margin: 0 auto; }
+
+  header {
+    background: linear-gradient(135deg, var(--azul-escuro), var(--azul-medio));
+    color: var(--branco);
+    padding: 32px 36px;
+    border-radius: 10px 10px 0 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 28px;
+  }
+  .logo-circulo {
+    width: 72px; height: 72px; min-width: 72px;
+    border-radius: 50%;
+    background: var(--branco);
+    color: var(--azul-escuro);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.9em; font-weight: 800; letter-spacing: -1px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  header .cabecalho-texto { flex: 1; }
+  header h1 { font-size: 1.7em; font-weight: 700; letter-spacing: 0.3px; margin-bottom: 4px; line-height: 1.2; }
+  header .subtitulo { font-size: 0.95em; opacity: 0.92; margin-bottom: 8px; }
+  header .credito {
+    font-size: 0.85em; font-style: italic; opacity: 0.88;
+    padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.2);
+  }
+  header .credito strong { font-weight: 600; }
+
+  .secao {
+    background: var(--branco);
+    padding: 24px 32px;
+    border-left: 1px solid var(--cinza-borda);
+    border-right: 1px solid var(--cinza-borda);
+  }
+  .secao:last-of-type { border-bottom: 1px solid var(--cinza-borda); }
+  .secao h2 {
+    font-size: 1.2em; color: var(--azul-escuro);
+    margin-bottom: 16px; padding-bottom: 8px;
+    border-bottom: 2px solid var(--azul-claro);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .secao h2 .badge {
+    background: var(--azul-escuro); color: var(--branco);
+    width: 28px; height: 28px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.85em; font-weight: 700;
+  }
+  .secao h3 { font-size: 1.05em; color: var(--azul-medio); margin: 16px 0 8px; }
+  .secao p.desc { font-size: 0.9em; color: var(--cinza-texto); margin-bottom: 14px; }
+
+  /* Calculadora simples */
+  .simples-card {
+    background: linear-gradient(135deg, #F8FAFD, var(--azul-muito-claro));
+    border: 2px solid var(--azul-claro);
+    border-radius: 8px; padding: 24px;
+  }
+  .simples-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px; margin-bottom: 16px;
+  }
+  .simples-resultado {
+    display: none; background: var(--branco);
+    border-radius: 6px; padding: 18px; margin-top: 16px;
+    border-left: 4px solid var(--verde-escuro);
+  }
+  .simples-resultado.ativo { display: block; }
+  .simples-resultado .linha {
+    display: flex; justify-content: space-between;
+    padding: 6px 0; border-bottom: 1px dashed #E0E0E0; font-size: 0.95em;
+  }
+  .simples-resultado .linha:last-child {
+    border-bottom: none; padding-top: 10px; margin-top: 4px;
+    border-top: 2px solid var(--azul-escuro);
+    font-size: 1.15em; font-weight: 700; color: var(--vermelho-escuro);
+  }
+  .simples-resultado .rotulo { color: var(--cinza-texto); }
+  .simples-resultado .valor { font-weight: 600; }
+
+  /* Forms */
+  .grid-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+  }
+  .campo { display: flex; flex-direction: column; }
+  .campo label { font-size: 0.85em; font-weight: 600; color: var(--cinza-texto); margin-bottom: 4px; }
+  .campo input, .campo select {
+    padding: 9px 10px; border: 1px solid var(--cinza-borda);
+    border-radius: 4px; font-size: 0.95em; font-family: inherit; background: var(--branco);
+  }
+  .campo input:focus, .campo select:focus {
+    outline: none; border-color: var(--azul-medio);
+    box-shadow: 0 0 0 2px var(--azul-muito-claro);
+  }
+  .campo .ajuda { font-size: 0.75em; color: #888; margin-top: 3px; }
+
+  /* Valor inicial destaque */
+  .valor-inicial-box {
+    background: #FFF8E1;
+    border: 2px solid #F9A825;
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: end;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .valor-inicial-box .icone {
+    font-size: 1.6em;
+    line-height: 1;
+  }
+  .valor-inicial-box .campo { flex: 1; min-width: 200px; }
+  .valor-inicial-box .campo label { color: #795500; font-weight: 700; }
+  .valor-inicial-box .dica {
+    font-size: 0.82em;
+    color: #795500;
+    flex-basis: 100%;
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  /* Tabela boletos */
+  .tabela-boletos {
+    width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.9em;
+  }
+  .tabela-boletos th {
+    background: var(--azul-muito-claro); padding: 8px; text-align: left;
+    font-weight: 600; border: 1px solid var(--cinza-borda);
+  }
+  .tabela-boletos td { padding: 4px; border: 1px solid var(--cinza-borda); }
+  .tabela-boletos input, .tabela-boletos select {
+    width: 100%; border: none; padding: 6px 8px;
+    font-size: 0.95em; font-family: inherit; background: transparent;
+  }
+  .tabela-boletos input:focus, .tabela-boletos select:focus {
+    background: var(--azul-muito-claro); outline: none;
+  }
+  .acoes-tabela { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+
+  /* Botões */
+  button {
+    padding: 10px 18px; border: none; border-radius: 4px;
+    font-size: 0.9em; font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: all 0.15s;
+  }
+  .btn-primario { background: var(--azul-escuro); color: var(--branco); }
+  .btn-primario:hover { background: var(--azul-medio); }
+  .btn-secundario { background: var(--branco); color: var(--azul-escuro); border: 1px solid var(--azul-escuro); }
+  .btn-secundario:hover { background: var(--azul-muito-claro); }
+  .btn-perigo { background: var(--branco); color: var(--vermelho-escuro); border: 1px solid var(--vermelho-escuro); }
+  .btn-perigo:hover { background: #FFF0F0; }
+  .btn-calcular {
+    background: var(--verde-escuro); color: var(--branco);
+    font-size: 1.05em; padding: 14px 28px; margin-top: 16px; width: 100%;
+  }
+  .btn-calcular:hover { background: #2A4418; }
+  .btn-calcular-simples {
+    background: var(--azul-escuro); color: var(--branco);
+    font-size: 1em; padding: 12px 28px; width: 100%;
+  }
+  .btn-calcular-simples:hover { background: var(--azul-medio); }
+
+  /* Resultado */
+  #resultado { display: none; }
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px; margin-bottom: 24px;
+  }
+  .kpi {
+    background: var(--azul-muito-claro); padding: 18px;
+    border-radius: 6px; border-left: 4px solid var(--azul-escuro);
+  }
+  .kpi .rotulo {
+    font-size: 0.8em; color: var(--cinza-texto);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;
+  }
+  .kpi .valor { font-size: 1.5em; font-weight: 700; color: var(--azul-escuro); }
+  .kpi.destaque { background: #FFE8E8; border-left-color: var(--vermelho-escuro); }
+  .kpi.destaque .valor { color: var(--vermelho-escuro); }
+
+  .tabela-resultado { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85em; }
+  .tabela-resultado thead { background: var(--azul-escuro); color: var(--branco); }
+  .tabela-resultado th {
+    padding: 10px 8px; text-align: center; font-weight: 600;
+    border: 1px solid var(--azul-medio);
+  }
+  .tabela-resultado td { padding: 7px 8px; border: 1px solid var(--cinza-borda); text-align: right; }
+  .tabela-resultado td.mes { text-align: left; }
+  .tabela-resultado td.pct { text-align: center; color: #0070C0; font-weight: 600; }
+  .tabela-resultado tr.aniversario { background: var(--laranja-claro); }
+  .tabela-resultado tr.total { background: var(--verde-claro); font-weight: 700; }
+  .tabela-resultado tr.total td { border-top: 2px double var(--azul-escuro); padding: 11px 8px; }
+  .diferenca-positiva { color: var(--vermelho-escuro); font-weight: 600; }
+  .diferenca-negativa { color: var(--verde-escuro); font-weight: 600; }
+
+  .alerta { padding: 12px 16px; border-radius: 4px; margin: 14px 0; font-size: 0.9em; }
+  .alerta-info { background: #E3F2FD; border-left: 4px solid #1976D2; color: #0D47A1; }
+  .alerta-aviso { background: #FFF8E1; border-left: 4px solid #F9A825; color: #795500; }
+
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 2px solid var(--azul-claro); }
+  .tab {
+    padding: 10px 18px; background: transparent; color: var(--cinza-texto);
+    border: none; border-radius: 4px 4px 0 0; cursor: pointer;
+    font-weight: 600; font-size: 0.9em;
+  }
+  .tab.ativo { background: var(--azul-escuro); color: var(--branco); }
+
+  footer {
+    background: var(--azul-escuro); color: var(--branco); text-align: center;
+    padding: 24px 20px; border-radius: 0 0 10px 10px;
+    font-size: 0.85em; line-height: 1.7;
+  }
+  footer .autor-destaque { font-size: 1em; font-weight: 700; margin-bottom: 4px; letter-spacing: 0.3px; }
+  footer .autor-sub { opacity: 0.9; margin-bottom: 12px; }
+  footer .ressalva {
+    font-size: 0.78em; opacity: 0.75; margin-top: 12px;
+    padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.15);
+    font-style: italic; max-width: 900px; margin-left: auto; margin-right: auto;
+  }
+
+  @media print {
+    body { background: white; padding: 0; }
+    button, .tabs { display: none !important; }
+    .secao.inputs { display: none; }
+    .simples-card { display: none; }
+    header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .kpi, .tabela-resultado tr.aniversario, .tabela-resultado tr.total {
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+  }
+  @media (max-width: 600px) {
+    body { padding: 10px; }
+    header { padding: 20px; gap: 16px; flex-direction: column; text-align: center; }
+    header h1 { font-size: 1.3em; }
+    .secao { padding: 18px; }
+    .grid-form { grid-template-columns: 1fr; }
+    .simples-grid { grid-template-columns: 1fr; }
+    .valor-inicial-box { flex-direction: column; }
+    .tabela-resultado { font-size: 0.75em; }
+    .tabela-resultado th, .tabela-resultado td { padding: 5px 4px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="logo-circulo">EF</div>
+  <div class="cabecalho-texto">
+    <h1>Calculadora Elton Fernandes</h1>
+    <div class="subtitulo">Reajuste ANS — Planos Individuais/Familiares</div>
+    <div class="credito">Em homenagem ao <strong>Prof. Elton Fernandes</strong> · Mentoria Estratégica em Direito da Saúde</div>
+  </div>
+</header>
+
+<!-- ========== CALCULADORA SIMPLES ========== -->
+<section class="secao">
+  <h2><span class="badge">1</span> Calculadora Rápida</h2>
+  <p class="desc">
+    Modo rápido: informe o valor antes e depois do reajuste, mais o mês/ano em que ele foi aplicado.
+    A calculadora compara com o índice ANS do ciclo correspondente e mostra o excesso mensal e anualizado.
+  </p>
+
+  <div class="simples-card">
+    <div class="simples-grid">
+      <div class="campo">
+        <label>Valor da mensalidade antes do reajuste (R$)</label>
+        <input type="text" id="s-valor-antes" placeholder="Ex.: 1.000,00">
+      </div>
+      <div class="campo">
+        <label>Valor da mensalidade após o reajuste (R$)</label>
+        <input type="text" id="s-valor-depois" placeholder="Ex.: 1.250,00">
+        <span class="ajuda">O % será calculado automaticamente</span>
+      </div>
+      <div class="campo">
+        <label>Mês/Ano do aniversário</label>
+        <input type="month" id="s-mes-aniversario">
+        <span class="ajuda">Determina o ciclo ANS aplicável</span>
+      </div>
+    </div>
+    <button class="btn-calcular-simples" type="button" id="btn-simples">Calcular excesso</button>
+
+    <div class="simples-resultado" id="s-resultado">
+      <div class="linha">
+        <span class="rotulo">Reajuste aplicado pela operadora:</span>
+        <span class="valor" id="s-pct-op">—</span>
+      </div>
+      <div class="linha">
+        <span class="rotulo">Limite ANS (<span id="s-ciclo">—</span>):</span>
+        <span class="valor" id="s-pct-ans">—</span>
+      </div>
+      <div class="linha">
+        <span class="rotulo">Excesso em pontos percentuais:</span>
+        <span class="valor" id="s-excesso-pp">—</span>
+      </div>
+      <div class="linha">
+        <span class="rotulo">Valor que seria devido (ANS):</span>
+        <span class="valor" id="s-valor-ans">—</span>
+      </div>
+      <div class="linha">
+        <span class="rotulo">Excesso mensal:</span>
+        <span class="valor" id="s-excesso-mensal">—</span>
+      </div>
+      <div class="linha">
+        <span class="rotulo">Excesso em 12 meses:</span>
+        <span class="valor" id="s-excesso-anual">—</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== COMPARATIVO DETALHADO ========== -->
+<section class="secao inputs">
+  <h2><span class="badge">2</span> Comparativo Detalhado (histórico completo)</h2>
+  <p class="desc">
+    Para casos com múltiplos anos, mudanças de faixa etária, entradas/saídas de beneficiário ou necessidade
+    de apurar o indébito acumulado do triênio, use o comparativo detalhado abaixo.
+  </p>
+
+  <h3>Dados do contrato</h3>
+  <div class="grid-form">
+    <div class="campo">
+      <label>Beneficiário(s)</label>
+      <input type="text" id="beneficiario" placeholder="Nome completo">
+    </div>
+    <div class="campo">
+      <label>Operadora</label>
+      <input type="text" id="operadora" placeholder="Ex.: Bradesco Saúde, Unimed">
+    </div>
+    <div class="campo">
+      <label>Produto / Plano</label>
+      <input type="text" id="produto" placeholder="Opcional">
+    </div>
+    <div class="campo">
+      <label>Data de início do contrato</label>
+      <input type="month" id="data-inicio">
+    </div>
+    <div class="campo">
+      <label>Mês de aniversário do contrato</label>
+      <select id="mes-aniversario">
+        <option value="">Selecione</option>
+        <option value="1">Janeiro</option>
+        <option value="2">Fevereiro</option>
+        <option value="3">Março</option>
+        <option value="4">Abril</option>
+        <option value="5">Maio</option>
+        <option value="6">Junho</option>
+        <option value="7">Julho</option>
+        <option value="8">Agosto</option>
+        <option value="9">Setembro</option>
+        <option value="10">Outubro</option>
+        <option value="11">Novembro</option>
+        <option value="12">Dezembro</option>
+      </select>
+      <span class="ajuda">Mês em que a operadora aplica o reajuste anual</span>
+    </div>
+    <div class="campo">
+      <label>Número do processo</label>
+      <input type="text" id="processo" placeholder="Opcional">
+    </div>
+  </div>
+
+  <h3 style="margin-top: 20px;">Histórico de valores mensais</h3>
+
+  <div class="tabs">
+    <button class="tab ativo" data-tab="simples-hist">Por ano (simplificado)</button>
+    <button class="tab" data-tab="detalhado">Mês a mês</button>
+  </div>
+
+  <!-- ===== TAB: POR ANO ===== -->
+  <div id="tab-simples-hist">
+    <div class="valor-inicial-box">
+      <div class="icone">📌</div>
+      <div class="campo">
+        <label>Valor inicial da mensalidade (antes do 1º reajuste) — R$</label>
+        <input type="text" id="valor-inicial" placeholder="Ex.: 2.200,00">
+      </div>
+      <div class="dica">
+        Este é o valor pago desde a contratação até o primeiro aniversário do plano.
+        Ele é o ponto de partida de ambas as curvas (operadora e ANS). Sem ele, não há como
+        calcular a diferença acumulada.
+      </div>
+    </div>
+
+    <p style="font-size: 0.85em; color: var(--cinza-texto); margin-bottom: 12px;">
+      Agora informe o <strong>valor da mensalidade vigente após cada aniversário</strong>. A calculadora assume que
+      todos os meses entre aniversários mantiveram o mesmo valor.
+    </p>
+    <div id="linhas-simples-hist"></div>
+    <div class="acoes-tabela">
+      <button class="btn-secundario" type="button" id="add-linha-simples-hist">+ Adicionar período</button>
+      <button class="btn-perigo" type="button" id="limpar-simples-hist">Limpar</button>
+    </div>
+  </div>
+
+  <!-- ===== TAB: MÊS A MÊS ===== -->
+  <div id="tab-detalhado" style="display:none;">
+    <p style="font-size: 0.85em; color: var(--cinza-texto); margin-bottom: 12px;">
+      Informe o valor pago em cada mês. Ideal para casos com mudanças de faixa etária, entrada/saída de
+      beneficiários, coparticipação ou recomposições fora do aniversário.
+    </p>
+    <table class="tabela-boletos">
+      <thead>
+        <tr>
+          <th style="width: 28%;">Mês/Ano</th>
+          <th style="width: 25%;">Valor pago (R$)</th>
+          <th>Observação</th>
+          <th style="width: 60px;"></th>
+        </tr>
+      </thead>
+      <tbody id="linhas-detalhado"></tbody>
+    </table>
+    <div class="acoes-tabela">
+      <button class="btn-secundario" type="button" id="add-linha-detalhado">+ Adicionar mês</button>
+      <button class="btn-secundario" type="button" id="preencher-sequencial">Preencher sequencial</button>
+      <button class="btn-perigo" type="button" id="limpar-detalhado">Limpar</button>
+    </div>
+  </div>
+
+  <button class="btn-calcular" type="button" id="calcular">Calcular diferença ANS × Operadora</button>
+</section>
+
+<!-- ========== RESULTADO ========== -->
+<section class="secao" id="resultado">
+  <h2><span class="badge">3</span> Resultado do Comparativo</h2>
+
+  <div id="alertas"></div>
+
+  <div class="kpis">
+    <div class="kpi">
+      <div class="rotulo">Período analisado</div>
+      <div class="valor" id="kpi-periodo">—</div>
+    </div>
+    <div class="kpi">
+      <div class="rotulo">Total pago à operadora</div>
+      <div class="valor" id="kpi-total-operadora">—</div>
+    </div>
+    <div class="kpi">
+      <div class="rotulo">Total devido (curva ANS)</div>
+      <div class="valor" id="kpi-total-ans">—</div>
+    </div>
+    <div class="kpi destaque">
+      <div class="rotulo">Diferença total (indébito)</div>
+      <div class="valor" id="kpi-diferenca">—</div>
+    </div>
+    <div class="kpi destaque">
+      <div class="rotulo">Diferença no triênio</div>
+      <div class="valor" id="kpi-trienio">—</div>
+    </div>
+  </div>
+
+  <h3>Detalhamento mês a mês</h3>
+  <div style="overflow-x: auto;">
+    <table class="tabela-resultado" id="tabela-detalhe">
+      <thead>
+        <tr>
+          <th rowspan="2">Mês/Ano</th>
+          <th colspan="2">Operadora</th>
+          <th colspan="2">ANS (simulado)</th>
+          <th rowspan="2">Diferença</th>
+          <th rowspan="2">Observações</th>
+        </tr>
+        <tr><th>Valor</th><th>%</th><th>Valor</th><th>%</th></tr>
+      </thead>
+      <tbody id="corpo-detalhe"></tbody>
+    </table>
+  </div>
+
+  <div class="acoes-tabela" style="margin-top: 20px;">
+    <button class="btn-primario" type="button" onclick="window.print()">Imprimir / Salvar PDF</button>
+    <button class="btn-secundario" type="button" id="exportar-csv">Exportar CSV</button>
+  </div>
+
+  <h3 style="margin-top: 24px;">Notas metodológicas</h3>
+  <div id="notas-metodologicas" style="font-size: 0.85em; color: var(--cinza-texto); line-height: 1.7;"></div>
+</section>
+
+<footer>
+  <div class="autor-destaque">Prof. Elton Fernandes</div>
+  <div class="autor-sub">Mentoria Estratégica em Direito da Saúde</div>
+  <div>Calculadora educacional de reajuste ANS · Planos individuais/familiares</div>
+  <div>Índices oficiais ANS: Mai/2000 – Abr/2026 (26 ciclos)</div>
+  <div class="ressalva">
+    Esta ferramenta tem natureza educacional. Os valores apurados são estimativos e não substituem análise
+    técnica-atuarial especializada, perícia judicial ou assessoria jurídica individualizada.
+    Verifique sempre a divulgação do ciclo vigente no portal oficial da ANS.
+  </div>
+</footer>
+
+</div>
+
+<script>
+// ============================================================
+// ÍNDICES ANS — PLANOS INDIVIDUAIS/FAMILIARES
+// Ciclo = maio (ano N) a abril (ano N+1). Chave é o ano de início.
+// ============================================================
+const INDICES_ANS = {
+  2000: 0.0542, 2001: 0.0871, 2002: 0.0769, 2003: 0.0927, 2004: 0.1175,
+  2005: 0.1169, 2006: 0.0889, 2007: 0.0576, 2008: 0.0548, 2009: 0.0676,
+  2010: 0.0673, 2011: 0.0769, 2012: 0.0793, 2013: 0.0904, 2014: 0.0965,
+  2015: 0.1355, 2016: 0.1357, 2017: 0.1355, 2018: 0.1000, 2019: 0.0735,
+  2020: 0.0814, 2021: -0.0819, 2022: 0.1550, 2023: 0.0963, 2024: 0.0691,
+  2025: 0.0606
+};
+
+const MESES_PT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const MESES_PT_LONGO = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function fmtBRL(v) {
+  if (v === null || v === undefined || isNaN(v)) return '—';
+  return 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function fmtPct(v) {
+  if (v === null || v === undefined || isNaN(v)) return '';
+  const sinal = v > 0 ? '+' : '';
+  return sinal + (v * 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
+}
+function parseValor(str) {
+  if (!str) return NaN;
+  return parseFloat(String(str).replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.'));
+}
+function mesAno(ano, mes) {
+  return MESES_PT[mes - 1] + '/' + ano;
+}
+function indiceAnsParaAniversario(ano, mes) {
+  const anoCiclo = mes >= 5 ? ano : ano - 1;
+  return INDICES_ANS[anoCiclo];
+}
+function nomeCicloAns(ano, mes) {
+  const anoCiclo = mes >= 5 ? ano : ano - 1;
+  return 'Mai/' + anoCiclo + ' – Abr/' + (anoCiclo + 1);
+}
+
+// ============================================================
+// CALCULADORA SIMPLES
+// ============================================================
+document.getElementById('btn-simples').addEventListener('click', () => {
+  const vAntes = parseValor(document.getElementById('s-valor-antes').value);
+  const vDepois = parseValor(document.getElementById('s-valor-depois').value);
+  const mesAniv = document.getElementById('s-mes-aniversario').value;
+
+  if (isNaN(vAntes) || vAntes <= 0 || isNaN(vDepois) || vDepois <= 0) {
+    alert('Informe os dois valores (antes e depois do reajuste).');
+    return;
+  }
+  if (!mesAniv) { alert('Informe o mês/ano do aniversário.'); return; }
+
+  const [ano, mes] = mesAniv.split('-').map(Number);
+  const idxAns = indiceAnsParaAniversario(ano, mes);
+  const pctOp = (vDepois / vAntes) - 1;
+
+  document.getElementById('s-ciclo').textContent = nomeCicloAns(ano, mes);
+  document.getElementById('s-pct-op').textContent = fmtPct(pctOp);
+
+  if (idxAns === undefined) {
+    ['s-pct-ans','s-excesso-pp','s-valor-ans','s-excesso-mensal','s-excesso-anual'].forEach(id =>
+      document.getElementById(id).textContent = '—');
+    document.getElementById('s-pct-ans').textContent = 'Índice não disponível';
+  } else {
+    const valorAns = vAntes * (1 + idxAns);
+    const excessoMensal = vDepois - valorAns;
+    const excessoPp = (pctOp - idxAns) * 100;
+    document.getElementById('s-pct-ans').textContent = fmtPct(idxAns);
+    document.getElementById('s-excesso-pp').textContent =
+      (excessoPp >= 0 ? '+' : '') + excessoPp.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' p.p.';
+    document.getElementById('s-valor-ans').textContent = fmtBRL(valorAns);
+    document.getElementById('s-excesso-mensal').textContent = fmtBRL(excessoMensal);
+    document.getElementById('s-excesso-anual').textContent = fmtBRL(excessoMensal * 12);
+  }
+  document.getElementById('s-resultado').classList.add('ativo');
+});
+
+// Auto-preencher mês no comparativo
+document.getElementById('s-mes-aniversario').addEventListener('change', (e) => {
+  if (e.target.value) {
+    const mes = parseInt(e.target.value.split('-')[1]);
+    const campoDet = document.getElementById('mes-aniversario');
+    if (!campoDet.value) campoDet.value = String(mes);
+  }
+});
+
+// ============================================================
+// MODO SIMPLES (histórico por ano)
+// ============================================================
+function criarLinhaSimplesHist(ano = '', valor = '') {
+  const div = document.createElement('div');
+  div.className = 'linha-simples-hist';
+  div.style.cssText = 'display:grid; grid-template-columns: 1fr 1fr auto; gap:10px; margin-bottom:8px; align-items:end;';
+  div.innerHTML = `
+    <div class="campo">
+      <label>Ano do aniversário</label>
+      <input type="number" class="simples-ano" min="2000" max="2030" value="${ano}" placeholder="2023">
+    </div>
+    <div class="campo">
+      <label>Valor após o reajuste (R$)</label>
+      <input type="text" class="simples-valor" value="${valor}" placeholder="Ex.: 1.234,56">
+    </div>
+    <button class="btn-perigo" type="button" onclick="this.parentElement.remove()">×</button>
+  `;
+  return div;
+}
+document.getElementById('add-linha-simples-hist').addEventListener('click', () => {
+  document.getElementById('linhas-simples-hist').appendChild(criarLinhaSimplesHist());
+});
+document.getElementById('limpar-simples-hist').addEventListener('click', () => {
+  document.getElementById('linhas-simples-hist').innerHTML = '';
+  document.getElementById('valor-inicial').value = '';
+  criarLinhasIniciaisSimplesHist();
+});
+function criarLinhasIniciaisSimplesHist() {
+  const atual = new Date().getFullYear();
+  for (let i = 4; i >= 0; i--) {
+    document.getElementById('linhas-simples-hist').appendChild(criarLinhaSimplesHist(atual - i, ''));
+  }
+}
+
+// ============================================================
+// MODO DETALHADO
+// ============================================================
+function criarLinhaDetalhado(mes = '', ano = '', valor = '', obs = '') {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td>
+      <select class="det-mes">
+        <option value="">Mês</option>
+        ${MESES_PT.map((m, i) => `<option value="${i+1}" ${mes == i+1 ? 'selected' : ''}>${m}</option>`).join('')}
+      </select>
+      <input type="number" class="det-ano" min="2000" max="2030" placeholder="Ano" value="${ano}" style="width: 70px; margin-left: 4px;">
+    </td>
+    <td><input type="text" class="det-valor" value="${valor}" placeholder="0,00"></td>
+    <td><input type="text" class="det-obs" value="${obs}" placeholder="opcional"></td>
+    <td style="text-align:center;"><button class="btn-perigo" type="button" onclick="this.closest('tr').remove()" style="padding:4px 10px;">×</button></td>
+  `;
+  return tr;
+}
+document.getElementById('add-linha-detalhado').addEventListener('click', () => {
+  document.getElementById('linhas-detalhado').appendChild(criarLinhaDetalhado());
+});
+document.getElementById('limpar-detalhado').addEventListener('click', () => {
+  document.getElementById('linhas-detalhado').innerHTML = '';
+});
+document.getElementById('preencher-sequencial').addEventListener('click', () => {
+  const dataInicio = document.getElementById('data-inicio').value;
+  if (!dataInicio) { alert('Informe primeiro a data de início do contrato.'); return; }
+  const [anoIni, mesIni] = dataInicio.split('-').map(Number);
+  const hoje = new Date();
+  const tbody = document.getElementById('linhas-detalhado');
+  tbody.innerHTML = '';
+  let m = mesIni, a = anoIni;
+  while (a < hoje.getFullYear() || (a === hoje.getFullYear() && m <= hoje.getMonth() + 1)) {
+    tbody.appendChild(criarLinhaDetalhado(m, a, '', ''));
+    m++; if (m > 12) { m = 1; a++; }
+  }
+});
+
+// ============================================================
+// TABS
+// ============================================================
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('ativo'));
+    btn.classList.add('ativo');
+    const alvo = btn.dataset.tab;
+    document.getElementById('tab-simples-hist').style.display = alvo === 'simples-hist' ? 'block' : 'none';
+    document.getElementById('tab-detalhado').style.display = alvo === 'detalhado' ? 'block' : 'none';
+  });
+});
+
+// ============================================================
+// COLETA
+// ============================================================
+function coletarDadosSimplesHist() {
+  const linhas = document.querySelectorAll('.linha-simples-hist');
+  const periodos = [];
+  linhas.forEach(lin => {
+    const ano = parseInt(lin.querySelector('.simples-ano').value);
+    const valor = parseValor(lin.querySelector('.simples-valor').value);
+    if (!isNaN(ano) && !isNaN(valor) && valor > 0) periodos.push({ ano, valor });
+  });
+  periodos.sort((a, b) => a.ano - b.ano);
+  return periodos;
+}
+function coletarDadosDetalhado() {
+  const linhas = document.querySelectorAll('#linhas-detalhado tr');
+  const meses = [];
+  linhas.forEach(lin => {
+    const mes = parseInt(lin.querySelector('.det-mes').value);
+    const ano = parseInt(lin.querySelector('.det-ano').value);
+    const valor = parseValor(lin.querySelector('.det-valor').value);
+    const obs = lin.querySelector('.det-obs').value || '';
+    if (!isNaN(mes) && !isNaN(ano) && !isNaN(valor) && valor > 0)
+      meses.push({ ano, mes, valor, obs });
+  });
+  meses.sort((a, b) => a.ano !== b.ano ? a.ano - b.ano : a.mes - b.mes);
+  return meses;
+}
+
+// ============================================================
+// EXPANSÃO — modo simples para mês a mês
+// Agora com valor inicial como ponto de partida
+// ============================================================
+function expandirSimples(valorInicial, periodos, mesAniversario, dataInicioStr) {
+  const meses = [];
+  if (periodos.length === 0) return meses;
+
+  // Determinar mês de início
+  let anoInicio, mesInicio;
+  if (dataInicioStr) {
+    [anoInicio, mesInicio] = dataInicioStr.split('-').map(Number);
+  } else {
+    // Se não tem data de início, começa 12 meses antes do primeiro aniversário
+    anoInicio = periodos[0].ano - 1;
+    mesInicio = mesAniversario;
+  }
+
+  const ultimoAno = periodos[periodos.length - 1].ano;
+  // Termina no mês antes do próximo aniversário após o último ano
+  const fimAno = mesAniversario === 1 ? ultimoAno + 1 : ultimoAno;
+  const fimMes = mesAniversario - 1 === 0 ? 12 : mesAniversario - 1;
+
+  let a = anoInicio, m = mesInicio;
+  let valorAtual = valorInicial;
+  let idxPeriodo = 0;
+
+  while (a < fimAno || (a === fimAno && m <= fimMes)) {
+    // Se chegou no mês de aniversário e tem período correspondente, atualiza
+    if (m === mesAniversario && idxPeriodo < periodos.length && periodos[idxPeriodo].ano === a) {
+      valorAtual = periodos[idxPeriodo].valor;
+      idxPeriodo++;
+    }
+
+    meses.push({ ano: a, mes: m, valor: valorAtual, obs: '' });
+
+    m++;
+    if (m > 12) { m = 1; a++; }
+  }
+
+  return meses;
+}
+
+// ============================================================
+// CÁLCULO PRINCIPAL
+// ============================================================
+function calcular() {
+  const mesAniversario = parseInt(document.getElementById('mes-aniversario').value);
+  if (isNaN(mesAniversario)) {
+    alert('Selecione o mês de aniversário do contrato.');
+    return;
+  }
+
+  const abaAtiva = document.querySelector('.secao.inputs .tab.ativo').dataset.tab;
+  let meses;
+
+  if (abaAtiva === 'simples-hist') {
+    const valorInicial = parseValor(document.getElementById('valor-inicial').value);
+    if (isNaN(valorInicial) || valorInicial <= 0) {
+      alert('Informe o valor inicial da mensalidade (antes do 1º reajuste).');
+      document.getElementById('valor-inicial').focus();
+      return;
+    }
+    const periodos = coletarDadosSimplesHist();
+    if (periodos.length < 1) {
+      alert('Informe ao menos 1 período (ano) com valor após aniversário.');
+      return;
+    }
+    const dataInicioStr = document.getElementById('data-inicio').value || '';
+    meses = expandirSimples(valorInicial, periodos, mesAniversario, dataInicioStr);
+  } else {
+    meses = coletarDadosDetalhado();
+    if (meses.length < 2) {
+      alert('Informe ao menos 2 meses com valores.');
+      return;
+    }
+  }
+
+  if (meses.length < 2) {
+    alert('Dados insuficientes para gerar a comparação. Verifique os valores informados.');
+    return;
+  }
+
+  // Construção das duas curvas
+  const linhas = [];
+  let valorAnsAnterior = null;
+  let valorOpAnterior = null;
+  const alertas = [];
+
+  for (let i = 0; i < meses.length; i++) {
+    const m = meses[i];
+    const ehAniversario = m.mes === mesAniversario && i > 0; // primeiro mês nunca é aniversário
+    let valorAns, pctOp = null, pctAns = null, obs = m.obs || '';
+
+    if (i === 0) {
+      valorAns = m.valor;
+    } else {
+      const coefOp = m.valor / valorOpAnterior;
+      pctOp = coefOp - 1;
+
+      if (ehAniversario) {
+        const idxAns = indiceAnsParaAniversario(m.ano, m.mes);
+        if (idxAns === undefined) {
+          alertas.push({
+            tipo: 'aviso',
+            msg: `Índice ANS não disponível para o ciclo de ${nomeCicloAns(m.ano, m.mes)}. Mantido o valor anterior na curva ANS.`
+          });
+          valorAns = valorAnsAnterior;
+          pctAns = 0;
+        } else {
+          valorAns = valorAnsAnterior * (1 + idxAns);
+          pctAns = idxAns;
+          obs = `Reajuste operadora: ${fmtPct(pctOp)}. Limite ANS (${nomeCicloAns(m.ano, m.mes)}): ${fmtPct(idxAns)}. ` +
+                (Math.abs(pctOp - idxAns) > 0.0001
+                  ? `Excesso: ${((pctOp - idxAns) * 100).toFixed(2)} p.p.`
+                  : 'Dentro do limite.');
+        }
+      } else if (Math.abs(coefOp - 1) > 0.0001) {
+        // Variação fora do aniversário
+        valorAns = valorAnsAnterior * coefOp;
+        pctAns = coefOp - 1;
+        if (!obs) obs = 'Variação não-anual (entrada/saída de beneficiário, faixa etária ou recomposição). Coeficiente aplicado em ambas as colunas.';
+      } else {
+        valorAns = valorAnsAnterior;
+      }
+    }
+
+    linhas.push({
+      ano: m.ano, mes: m.mes, valorOp: m.valor, pctOp, valorAns, pctAns,
+      diferenca: m.valor - valorAns, ehAniversario, obs
+    });
+
+    valorOpAnterior = m.valor;
+    valorAnsAnterior = valorAns;
+  }
+
+  // Verificação: aniversários consecutivos com mesmo índice
+  const anosAniversario = linhas.filter(l => l.ehAniversario && l.pctAns !== null);
+  for (let i = 1; i < anosAniversario.length; i++) {
+    if (Math.abs(anosAniversario[i].pctAns - anosAniversario[i - 1].pctAns) < 0.00001) {
+      alertas.push({
+        tipo: 'aviso',
+        msg: `Aniversários consecutivos (${mesAno(anosAniversario[i-1].ano, anosAniversario[i-1].mes)} e ${mesAno(anosAniversario[i].ano, anosAniversario[i].mes)}) usaram o mesmo índice ANS. Verifique o mês de aniversário informado.`
+      });
+      break;
+    }
+  }
+
+  renderizarResultado(linhas, alertas, mesAniversario);
+}
+
+// ============================================================
+// RENDERIZAÇÃO
+// ============================================================
+function renderizarResultado(linhas, alertas, mesAniversario) {
+  const resultadoEl = document.getElementById('resultado');
+  resultadoEl.style.display = 'block';
+
+  const alertasEl = document.getElementById('alertas');
+  alertasEl.innerHTML = '';
+  alertas.forEach(a => {
+    const div = document.createElement('div');
+    div.className = 'alerta alerta-' + a.tipo;
+    div.textContent = a.msg;
+    alertasEl.appendChild(div);
+  });
+
+  const totalOp = linhas.reduce((s, l) => s + l.valorOp, 0);
+  const totalAns = linhas.reduce((s, l) => s + l.valorAns, 0);
+  const diferenca = totalOp - totalAns;
+
+  const primeiro = linhas[0];
+  const ultimo = linhas[linhas.length - 1];
+  document.getElementById('kpi-periodo').textContent =
+    `${mesAno(primeiro.ano, primeiro.mes)} – ${mesAno(ultimo.ano, ultimo.mes)}`;
+  document.getElementById('kpi-total-operadora').textContent = fmtBRL(totalOp);
+  document.getElementById('kpi-total-ans').textContent = fmtBRL(totalAns);
+  document.getElementById('kpi-diferenca').textContent = fmtBRL(diferenca);
+
+  const hoje = new Date();
+  const inicioTrienio = new Date(hoje.getFullYear() - 3, hoje.getMonth(), 1);
+  const diferencaTrienio = linhas
+    .filter(l => new Date(l.ano, l.mes - 1, 1) >= inicioTrienio)
+    .reduce((s, l) => s + l.diferenca, 0);
+  document.getElementById('kpi-trienio').textContent = fmtBRL(diferencaTrienio);
+
+  const tbody = document.getElementById('corpo-detalhe');
+  tbody.innerHTML = '';
+
+  linhas.forEach(l => {
+    const tr = document.createElement('tr');
+    if (l.ehAniversario) tr.className = 'aniversario';
+    const difClass = l.diferenca > 0.01 ? 'diferenca-positiva' : (l.diferenca < -0.01 ? 'diferenca-negativa' : '');
+    tr.innerHTML = `
+      <td class="mes">${mesAno(l.ano, l.mes)}</td>
+      <td>${fmtBRL(l.valorOp)}</td>
+      <td class="pct">${l.pctOp !== null && Math.abs(l.pctOp) > 0.0001 ? fmtPct(l.pctOp) : ''}</td>
+      <td>${fmtBRL(l.valorAns)}</td>
+      <td class="pct">${l.pctAns !== null && Math.abs(l.pctAns) > 0.0001 ? fmtPct(l.pctAns) : ''}</td>
+      <td class="${difClass}">${fmtBRL(l.diferenca)}</td>
+      <td style="text-align:left; font-size:0.85em;">${l.obs || ''}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Total geral
+  const trTotal = document.createElement('tr');
+  trTotal.className = 'total';
+  trTotal.innerHTML = `
+    <td class="mes"><strong>TOTAL GERAL</strong></td>
+    <td><strong>${fmtBRL(totalOp)}</strong></td><td></td>
+    <td><strong>${fmtBRL(totalAns)}</strong></td><td></td>
+    <td class="diferenca-positiva"><strong>${fmtBRL(diferenca)}</strong></td><td></td>
+  `;
+  tbody.appendChild(trTotal);
+
+  // Triênio
+  const trTrienio = document.createElement('tr');
+  trTrienio.className = 'total';
+  const trienioIni = `${MESES_PT[inicioTrienio.getMonth()]}/${inicioTrienio.getFullYear()}`;
+  const trienioFim = `${MESES_PT[hoje.getMonth()]}/${hoje.getFullYear()}`;
+  trTrienio.innerHTML = `
+    <td class="mes"><strong>TRIÊNIO (${trienioIni} – ${trienioFim})</strong></td>
+    <td colspan="4"></td>
+    <td class="diferenca-positiva"><strong>${fmtBRL(diferencaTrienio)}</strong></td><td></td>
+  `;
+  tbody.appendChild(trTrienio);
+
+  // Notas metodológicas
+  const notasEl = document.getElementById('notas-metodologicas');
+  const aniversariosComIndice = linhas.filter(l => l.ehAniversario && l.pctAns !== null);
+  const tabelaCiclos = aniversariosComIndice.map(l =>
+    `${mesAno(l.ano, l.mes)} → ${nomeCicloAns(l.ano, l.mes)} = ${fmtPct(l.pctAns)}`
+  ).join(' · ');
+
+  const benefNome = document.getElementById('beneficiario').value || '(não informado)';
+  const operadoraNome = document.getElementById('operadora').value || '(não informada)';
+
+  notasEl.innerHTML = `
+    <p><strong>1. Base de cálculo:</strong> valores informados pelo usuário para o beneficiário ${benefNome}, operadora ${operadoraNome}.</p>
+    <p><strong>2. Mês de aniversário:</strong> ${MESES_PT_LONGO[mesAniversario - 1]}.</p>
+    <p><strong>3. Tabela ciclo × aniversário × índice:</strong> ${tabelaCiclos || '—'}.</p>
+    <p><strong>4. Variações não-anuais:</strong> quando detectadas, o mesmo coeficiente foi aplicado em ambas as colunas (operadora e ANS simulado), isolando o excesso exclusivamente aos aniversários.</p>
+    <p><strong>5. Período do triênio:</strong> ${trienioIni} a ${trienioFim} (36 meses retroativos à data atual).</p>
+    <p><strong>6. Ressalva de arredondamento:</strong> os percentuais exibidos são calculados a partir dos valores reais do boleto e podem apresentar diferença mínima de arredondamento na última casa decimal em relação a um cálculo manual com o percentual truncado. Isso não constitui erro.</p>
+    <p><strong>7. Fonte dos índices ANS:</strong> tabela consolidada de reajustes autorizados pela ANS para planos individuais/familiares, ciclos Mai/2000 a Abr/2026.</p>
+  `;
+
+  resultadoEl.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ============================================================
+// EXPORTAÇÃO CSV
+// ============================================================
+document.getElementById('exportar-csv').addEventListener('click', () => {
+  const linhas = Array.from(document.querySelectorAll('#corpo-detalhe tr')).map(tr => {
+    return Array.from(tr.querySelectorAll('td')).map(td =>
+      '"' + (td.textContent || '').replace(/"/g, '""').trim() + '"'
+    ).join(';');
+  });
+  const cabecalho = 'Mes/Ano;Valor Operadora;% Operadora;Valor ANS;% ANS;Diferenca;Observacoes';
+  const csv = '\ufeff' + cabecalho + '\n' + linhas.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const benef = (document.getElementById('beneficiario').value || 'calculo').replace(/\s+/g, '_');
+  a.href = url;
+  a.download = `reajuste_${benef}_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+});
+
+// ============================================================
+// INICIALIZAÇÃO
+// ============================================================
+document.getElementById('calcular').addEventListener('click', calcular);
+criarLinhasIniciaisSimplesHist();
+for (let i = 0; i < 12; i++) {
+  document.getElementById('linhas-detalhado').appendChild(criarLinhaDetalhado());
+}
+</script>
+</body>
+</html>
